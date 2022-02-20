@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Poker</title>
+
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet"/>
+        <link rel="stylesheet" type="text/css" href="/Client/Style.css"/>
+    </head>
+    <body>
+        <h1>Poker</h1>
+        <div id="login">
+            <label for="name">Username: </label> <input type="text" name="name" id="name"> <button onclick="chooseName()">Play</button>
+            <label id="nameError" class="hidden">Please enter a valid username.</label>
+        </div>
+        <div id="rooms" class="hidden">
+            <label for="createRoom">New Room: </label> <input type="text" name="createRoom" id="roomName"> <button onclick="createRoom()">Create</button>
+            <label id="nameError" class="hidden">Please enter a valid room name.</label>
+            <ul id="roomList"></ul>
+        </div>
+        <div id="game">
+            <button onclick="leaveRoom()">Leave room</button>
+            <canvas></canvas>
+        </div>
+        <canvas id="canvas"></canvas>
+
+        <img src="" class="hidden">
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/Client/Script.js"></script>
+    </body>
+</html>
