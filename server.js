@@ -23,9 +23,9 @@ function Player(name, player) {
         ...player,
         name: name,
         hand: [],
-        money: [1, 2, 3, 4, 5],
+        chips: [1, 2, 3, 4, 5],
         calcMoney: function() {
-            return (money[0] * 100) + (money[1] * 50) + (money[2] * 25) + (money * 10) + (money[3] * 5) + (money[4]);
+            return (chips[0] * 100) + (chips[1] * 50) + (chips[2] * 25) + (chips * 10) + (chips[3] * 5) + (chips[4]);
         }
     };
 }
