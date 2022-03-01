@@ -14,17 +14,35 @@
         </div>
         <div id="rooms" class="hidden">
             <label for="createRoom">New Room: </label> <input type="text" name="createRoom" id="roomName"> <button onclick="createRoom()">Create</button>
-            <label id="nameError" class="hidden">Please enter a valid room name.</label>
             <ul id="roomList"></ul>
+            <label id="nameError" class="hidden">Error joining room.</label>
         </div>
         <div id="game">
-            <button onclick="leaveRoom()">Leave room</button>
-            <canvas></canvas>
+            <h2 id="roomName"></h2>
+
+            <button onclick="leaveRoom()">Leave</button>
+            <canvas id="canvas"></canvas>
+            <div id="firstBet" class="hidden">
+                <button onclick="fold()">Fold</button>
+                <button onclick="check()">Check</button>
+                <button onclick="bet()">Bet</button>
+            </div>
+            <div id="addBet">
+                <button onclick="fold()">Fold</button>
+                <button onclick="check()">Call</button>
+                <button onclick="bet()">Raise</button>
+            </div>
+            <div id="bet">
+                <button onclick="one()">1</button>
+                <button onclick="five()">5</button>
+                <button onclick="ten()">10</button>
+                <button onclick="twentyFive()">25</button>
+                <button onclick="hundred()">100</button>
+                <button onclick="allIn()">All In</button>
+            </div>
         </div>
-        <canvas id="canvas"></canvas>
-
+        <h3><a href="https://www.poker.org/beginners-guide-to-the-rules-of-poker/">How to play</a></h3>
         <img src="" class="hidden">
-
         <script src="/socket.io/socket.io.js"></script>
         <script src="/client/script.js"></script>
     </body>

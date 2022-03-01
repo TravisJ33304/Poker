@@ -17,6 +17,13 @@ app.use("/client", express.static(__dirname + "/client")); // clientside file di
 app.get("/", function (req, res) { // send when webpage loaded
   res.sendFile(__dirname + "/client/index.html");
 });
+// utility functions
+function checkInput(input) {
+    if (input && input != "")
+        return true;
+    else
+        return false;
+}
 // classes
 function Player(name, player) {
     return {
@@ -43,18 +50,20 @@ io.on("connection", function (socket) { // client connects
     socket.on("name", function(data) {
         socket = Player(data, socket); // add player attributes to socket
         players.push(socket); // add player to users
+        console.log("Name chosen: " + data);
         // get room names
         let names = [];
-        for (room of rooms)
-            names.push(room.name)
+        for (let room of rooms)
+            names.push(room.name);
         socket.emit("rooms", names); // send back the rooms
     });
     socket.on("createRoom", function(data) {
         socket.join(data);
         rooms.push(Room(data, socket));
+        console.log("Room created: " + data);
     });
     socket.on("joinRoom", function(data) {
-        for (room of rooms) {
+        for (let room of rooms) {
             if (room.name == data) {
                 room.players.push(socket);
                 socket.join(data);
