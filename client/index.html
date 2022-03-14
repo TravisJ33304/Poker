@@ -7,40 +7,40 @@
         <link rel="stylesheet" type="text/css" href="/client/style.css"/>
     </head>
     <body>
-        <h1>Poker</h1>
         <div id="login">
-            <label for="name">Username: </label> <input type="text" name="name" id="name"> <button onclick="chooseName()">Play</button>
+            <h1>Poker</h1>
+            <label for="name">Username: </label> <input type="text" name="name" id="name"> <button onclick="socket.emit('name', document.getElementById('name').value)">Play</button>
             <label id="nameError" class="hidden">Please enter a valid username.</label>
         </div>
         <div id="rooms" class="hidden">
-            <label for="createRoom">New Room: </label> <input type="text" name="createRoom" id="roomName"> <button onclick="createRoom()">Create</button>
+            <label for="createRoom">New Room: </label> <input type="text" name="createRoom" id="roomName"> <button onclick="socket.emit('createRoom', document.getElementById('roomName').value)">Create</button>
             <ul id="roomList"></ul>
             <label id="nameError" class="hidden">Error joining room.</label>
         </div>
-        <div id="game">
+        <div id="game" class="hidden">
             <h2 id="roomName"></h2>
-            <button onclick="leaveRoom()">Leave</button>
+            <button onclick="socket.emit('leaveRoom')">Leave</button>
             <canvas id="canvas"></canvas>
             <div id="firstBet" class="hidden">
-                <button onclick="fold()">Fold</button>
-                <button onclick="check()">Check</button>
-                <button onclick="bet()">Bet</button>
+                <button onclick="socket.emit('fold')">Fold</button>
+                <button onclick="socket.emit('check')">Check</button>
+                <button onclick="socket.emit('bet')">Bet</button>
             </div>
-            <div id="addBet">
-                <button onclick="fold()">Fold</button>
-                <button onclick="check()">Call</button>
-                <button onclick="bet()">Raise</button>
+            <div id="addBet" class="hidden">
+                <button onclick="socket.emit('fold')">Fold</button>
+                <button onclick="socket.emit('call')">Call</button>
+                <button onclick="socket.emit('raise')">Raise</button>
             </div>
-            <div id="bet">
-                <button onclick="one()">1</button>
-                <button onclick="five()">5</button>
-                <button onclick="ten()">10</button>
-                <button onclick="twentyFive()">25</button>
-                <button onclick="hundred()">100</button>
-                <button onclick="allIn()">All In</button>
+            <div id="bet" class="hidden">
+                <button onclick="socket.emit('bet', 1)">1</button>
+                <button onclick="socket.emit('bet', 5)">5</button>
+                <button onclick="socket.emit('bet', 10)">10</button>
+                <button onclick="socket.emit('bet', 25)">25</button>
+                <button onclick="socket.emit('bet', 100)">100</button>
+                <button onclick="socket.emit('bet', -1)">All In</button>
             </div>
         </div>
-        <h3><a href="https://www.poker.org/beginners-guide-to-the-rules-of-poker/">How to play</a></h3>
+        <h3 id="rules"><a href="https://www.poker.org/beginners-guide-to-the-rules-of-poker/">How to play</a></h3>
         <img src="" class="hidden">
         <script src="/socket.io/socket.io.js"></script>
         <script src="/client/script.js"></script>

@@ -24,9 +24,26 @@ function checkInput(input) {
     else
         return false;
 }
+function findRoom(name) {
+    for (let room of rooms)
+        if (name == room.name)
+            return room;
+    return false;
+}
+function roomNames() {
+    let names = [];
+    for (let room of rooms)
+        names.push(room.name);
+    return names;
+}
+function leaveRoom(player) {
+    player.leave(player.room.name);
+    player.room.players.splice(player.room.players.indexOf(player), 1);
+    console.log(player.name + " left room: " + player.room.name);
+}
 // classes
 function Player(name, player) {
-    return {
+    player = {
         ...player,
         name: name,
         hand: [],
@@ -47,32 +64,49 @@ function Room(name, host) {
 // client communication
 io.on("connection", function (socket) { // client connects
     console.log("User connected: " + socket.id);
-    socket.on("name", function(data) {
-        socket = Player(data, socket); // add player attributes to socket
-        players.push(socket); // add player to users
-        console.log("Name chosen: " + data);
-        // get room names
-        let names = [];
-        for (let room of rooms)
-            names.push(room.name);
-        socket.emit("rooms", names); // send back the rooms
-    });
-    socket.on("createRoom", function(data) {
-        socket.join(data);
-        rooms.push(Room(data, socket));
-        console.log("Room created: " + data);
-    });
-    socket.on("joinRoom", function(data) {
-        for (let room of rooms) {
-            if (room.name == data) {
-                room.players.push(socket);
-                socket.join(data);
-            }
+    socket.on("name", function(data) { // client sends name in
+        if (checkInput(data) === true) {
+            Player(data, socket); // add player attributes to socket
+            players.push(socket); // add player to users
+            console.log("Name chosen: " + data);
+            // get room names
+            let names = roomNames();
+            socket.emit("nameResult", names); // send back the rooms
+        } else { // invalid input
+            socket.emit("nameResult", false);
         }
-        socket.emit("roomError");
     });
-    socket.on("disconnect", function() {
+    socket.on("createRoom", function(data) { // make a new room
+        if (checkInput(data) === true && findRoom(data) === false) {
+            socket.join(data);
+            rooms.push(Room(data, socket));
+            socket.emit("roomResult", rooms[-1]);
+            socket.room = rooms[-1];
+            console.log("Room created: " + data);
+        } else { // error occurred
+            socket.emit("roomResult", false);
+        }
+    });
+    socket.on("joinRoom", function(data) { // join a room
+        let room = findRoom(data);
+        if (room !== false) {
+            room.players.push(socket);
+            socket.join(data);
+            socket.room = room;
+            socket.emit("roomsResult", room);
+            console.log(socket.name + " joined room: " + socket.room.name);
+        } else { // error occurred
+            socket.emit("roomResult", false);
+        }
+    });
+    socket.on("leaveRoom", function() { // clinet leaves lobby
+        leaveRoom(socket);
+        socket.emit("nameResult", roomNames());
+    });
+    socket.on("disconnect", function() { // client disconnects
         console.log("User disconnected: " + socket.id);
+        if (socket.room)
+            leaveRoom(socket);
         players.splice(players.indexOf(socket), 1); // remove userdata
     });
 });
