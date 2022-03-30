@@ -19,8 +19,11 @@
         </div>
         <div id="game" class="hidden">
             <h2 id="roomName"></h2>
-            <button onclick="socket.emit('leaveRoom')">Leave</button>
+            <button id="leaveRoom" onclick="socket.emit('leaveRoom')">Leave</button> <br> <br>
             <canvas id="canvas"></canvas>
+            <div>
+                <button onclick="socket.emit('ready')">Ready</button>
+            </div>
             <div id="firstBet" class="hidden">
                 <button onclick="socket.emit('fold')">Fold</button>
                 <button onclick="socket.emit('check')">Check</button>

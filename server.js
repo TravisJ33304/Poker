@@ -24,31 +24,33 @@ function checkInput(input) {
     else
         return false;
 }
-function findRoom(name) {
+function findRoom(name) { // look for a room and return it otherwise return false
     for (let room of rooms)
         if (name == room.name)
             return room;
     return false;
 }
-function roomNames() {
+function roomNames() { // return a list of room names
     let names = [];
     for (let room of rooms)
         names.push(room.name);
     return names;
 }
-function leaveRoom(player) {
-    player.leave(player.room.name);
-    player.room.players.splice(player.room.players.indexOf(player), 1);
-    console.log(player.name + " left room: " + player.room.name);
+function leaveRoom(player) { // disconnect a player from a game room
+    let room = player.room;
+    player.leave(room.name);
+    room.players.splice(room.players.indexOf(player), 1);
+    console.log(player.name + " left room: " + room.name);
 }
-// classes
+// object classes
 function Player(name, player) {
     player = {
         ...player,
         name: name,
-        hand: [],
-        chips: [1, 2, 3, 4, 5],
-        calcMoney: function() {
+        ready: false,
+        hand: [], // cards in hand
+        chips: [], // number of chips for each value
+        calcMoney: function() { // return the integer total of money
             return (chips[0] * 100) + (chips[1] * 50) + (chips[2] * 25) + (chips * 10) + (chips[3] * 5) + (chips[4]);
         }
     };
@@ -57,8 +59,35 @@ function Room(name, host) {
     return {
         name: name,
         players: [host],
-        state: "lobby",
-        deck: newDeck.splice(),
+        state: "lobby", // state of the game
+        currentBet: 0, // amount of bet being placed
+        deck: [], // deck of cards
+        playerTurn: 0,
+        checkStart: function() {
+            for (let player of this.players) // check all players are ready
+                if (player.ready === false)
+                    return;
+            this.newGame(); // start a new game
+        },
+        newGame: function() {
+            this.deck = newDeck.splice(); // copy a new deck
+            this.deck.sort(() => Math.random() - 0.5); // shuffle the deck
+            for (let player of this.players) {
+                player = {
+                    ...player,
+                    hand: [],
+                    chips: [1, 2, 3, 4, 5],
+                    betPlaced: 0,
+                };
+            }
+            this.players[0].chips[3]--; // big blind
+            this.players[0].betPlaced = 5;
+            this.players[1].chips[4]--; // small blind
+            this.players[1].betPlaced = 1;
+            this.currentBet = 5;
+            this.playerTurn = 1;
+            io.to(this.name).emit("gameStart", this);
+        }
     };
 }
 // client communication
@@ -82,7 +111,7 @@ io.on("connection", function (socket) { // client connects
             rooms.push(Room(data, socket));
             socket.emit("roomResult", rooms[-1]);
             socket.room = rooms[-1];
-            console.log("Room created: " + data);
+            console.log("Room created: " + socket.room);
         } else { // error occurred
             socket.emit("roomResult", false);
         }
@@ -99,7 +128,11 @@ io.on("connection", function (socket) { // client connects
             socket.emit("roomResult", false);
         }
     });
-    socket.on("leaveRoom", function() { // clinet leaves lobby
+    socket.on("ready", function() { // player is ready to start
+        socket.ready = true;
+        socket.room.checkStart();
+    });
+    socket.on("leaveRoom", function() { // client leaves lobby
         leaveRoom(socket);
         socket.emit("nameResult", roomNames());
     });
@@ -114,5 +147,3 @@ io.on("connection", function (socket) { // client connects
 http.listen(port, function () { // start the server
     console.log("Listening on port: " + port);
 });
-
-// shuffle the deck arr.sort(() => Math.random() - 0.5);

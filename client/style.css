@@ -9,10 +9,24 @@ html {
     text-align: center;
 }
 
+canvas {
+    background-color: green;
+    border: 2px solid black;
+    display: inline-block;
+}
+
+h2 {
+    display: inline-block;
+}
+
 #rules {
     position: absolute;
     bottom: 0;
     left: 50%;
+}
+
+#leaveRoom {
+    display: inline-block;
 }
 
 .hidden {
