@@ -2,8 +2,11 @@ let socket = io(); // connect to server
 
 let ctx; // rendering context
 
+let playerName; // keep track of player name
+
 socket.on("nameResult", function(data) {
     if (data) { // set name and recieved rooms
+        playerName = document.getElementById("name").value;
         let list = document.getElementById("roomList"); // get room list element
         list.innerHTML = "";  // erase list elements
         for (let room of data) { // append every name to the list
@@ -21,6 +24,7 @@ socket.on("nameResult", function(data) {
 });
 
 socket.on("roomResult", function(data) { // recieve room list from server
+    console.log(data);
     if (data) { // joined room and start game
         document.getElementById("rooms").style.display = "none";
         document.getElementById("game").style.display = "block";
@@ -30,10 +34,13 @@ socket.on("roomResult", function(data) { // recieve room list from server
     }
 });
 
+socket.on("gameStart", function(data) {
+
+});
+
 document.onload = function() { // run when the page loads
     // setup canvas and rendering
-    let canvas = document.getElementById("canvas");
-    ctx = canvas.getContext("2d");
+    ctx = document.getElementById("canvas").getContext("2d");
     canvas.width = 1600;
     canvas.height = 900;
 }

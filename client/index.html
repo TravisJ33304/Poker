@@ -15,7 +15,7 @@
         <div id="rooms" class="hidden">
             <label for="createRoom">New Room: </label> <input type="text" name="createRoom" id="roomName"> <button onclick="socket.emit('createRoom', document.getElementById('roomName').value)">Create</button>
             <ul id="roomList"></ul>
-            <label id="nameError" class="hidden">Error joining room.</label>
+            <label id="roomError" class="hidden">Error joining room.</label>
         </div>
         <div id="game" class="hidden">
             <h2 id="roomName"></h2>

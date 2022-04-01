@@ -108,10 +108,11 @@ io.on("connection", function (socket) { // client connects
     socket.on("createRoom", function(data) { // make a new room
         if (checkInput(data) === true && findRoom(data) === false) {
             socket.join(data);
-            rooms.push(Room(data, socket));
-            socket.emit("roomResult", rooms[-1]);
-            socket.room = rooms[-1];
-            console.log("Room created: " + socket.room);
+            let room = Room(data, socket);
+            rooms.push(room);
+            socket.emit("roomResult", room);
+            socket.room = room;
+            console.log("Room created: " + room);
         } else { // error occurred
             socket.emit("roomResult", false);
         }
