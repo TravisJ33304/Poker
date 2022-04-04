@@ -36,17 +36,17 @@ function roomNames() { // return a list of room names
         names.push(room.name);
     return names;
 }
-function leaveRoom(player) { // disconnect a player from a game room
-    let room = player.room;
-    player.leave(room.name);
-    room.players.splice(room.players.indexOf(player), 1);
-    console.log(player.name + " left room: " + room.name);
+function leaveRoom(socket) { // disconnect a player from a game room
+    let room = socket.player.room;
+    socket.leave(room.name);
+    room.players.splice(room.players.indexOf(socket.player), 1);
+    console.log(socket.player.name + " left room: " + room.name);
 }
 // object classes
-function Player(name, player) {
-    player = {
-        ...player,
+function Player(name) {
+    return {
         name: name,
+        room: {},
         ready: false,
         hand: [], // cards in hand
         chips: [], // number of chips for each value
@@ -95,8 +95,8 @@ io.on("connection", function (socket) { // client connects
     console.log("User connected: " + socket.id);
     socket.on("name", function(data) { // client sends name in
         if (checkInput(data) === true) {
-            Player(data, socket); // add player attributes to socket
-            players.push(socket); // add player to users
+            socket.player = Player(data); // add player object to socket
+            players.push(socket.player); // add player to users
             console.log("Name chosen: " + data);
             // get room names
             let names = roomNames();
@@ -108,11 +108,11 @@ io.on("connection", function (socket) { // client connects
     socket.on("createRoom", function(data) { // make a new room
         if (checkInput(data) === true && findRoom(data) === false) {
             socket.join(data);
-            let room = Room(data, socket);
+            let room = Room(data, socket.player);
             rooms.push(room);
             socket.emit("roomResult", room);
-            socket.room = room;
-            console.log("Room created: " + room);
+            socket.player.room = room;
+            console.log("Room created: " + data);
         } else { // error occurred
             socket.emit("roomResult", false);
         }
@@ -122,16 +122,16 @@ io.on("connection", function (socket) { // client connects
         if (room !== false) {
             room.players.push(socket);
             socket.join(data);
-            socket.room = room;
+            socket.player.room = room;
             socket.emit("roomsResult", room);
-            console.log(socket.name + " joined room: " + socket.room.name);
+            console.log(socket.player.name + " joined room: " + socket.player.room.name);
         } else { // error occurred
             socket.emit("roomResult", false);
         }
     });
     socket.on("ready", function() { // player is ready to start
-        socket.ready = true;
-        socket.room.checkStart();
+        socket.player.ready = true;
+        socket.player.room.checkStart();
     });
     socket.on("leaveRoom", function() { // client leaves lobby
         leaveRoom(socket);
@@ -139,9 +139,9 @@ io.on("connection", function (socket) { // client connects
     });
     socket.on("disconnect", function() { // client disconnects
         console.log("User disconnected: " + socket.id);
-        if (socket.room)
+        if (socket.player.room)
             leaveRoom(socket);
-        players.splice(players.indexOf(socket), 1); // remove userdata
+        players.splice(players.indexOf(socket.player), 1); // remove userdata
     });
 });
 
