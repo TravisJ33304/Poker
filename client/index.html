@@ -20,7 +20,7 @@
         <div id="game" class="hidden">
             <h2 id="roomName"></h2>
             <button id="leaveRoom" onclick="socket.emit('leaveRoom')">Leave</button> <br> <br>
-            <canvas id="canvas"></canvas>
+            <canvas id="canvas" width="1600" height="600"></canvas>
             <div>
                 <button onclick="socket.emit('ready')">Ready</button>
             </div>

@@ -24,23 +24,15 @@ socket.on("nameResult", function(data) {
 });
 
 socket.on("roomResult", function(data) { // recieve room list from server
-    console.log(data);
     if (data) { // joined room and start game
         document.getElementById("rooms").style.display = "none";
         document.getElementById("game").style.display = "block";
-        document.getElementById("roomName").innerText = data.name;
+        document.getElementById("roomName").innerHTML = data.name;
     } else { // error occurred
         document.getElementById("roomError").style.display = "block";
     }
 });
 
 socket.on("gameStart", function(data) {
-
-});
-
-document.onload = function() { // run when the page loads
-    // setup canvas and rendering
     ctx = document.getElementById("canvas").getContext("2d");
-    canvas.width = 1600;
-    canvas.height = 900;
-}
+});

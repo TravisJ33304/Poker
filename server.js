@@ -64,6 +64,8 @@ function Room(name, host) {
         deck: [], // deck of cards
         playerTurn: 0,
         checkStart: function() {
+            if (this.players.length < 2)
+                return;
             for (let player of this.players) // check all players are ready
                 if (player.ready === false)
                     return;
