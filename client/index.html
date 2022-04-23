@@ -21,18 +21,16 @@
             <h2 id="roomName"></h2>
             <button id="leaveRoom" onclick="socket.emit('leaveRoom')">Leave</button> <br> <br>
             <canvas id="canvas" width="1600" height="600"></canvas>
-            <div>
-                <button onclick="socket.emit('ready')">Ready</button>
-            </div>
+            <button id="ready" onclick="ready()">Ready</button>
             <div id="firstBet" class="hidden">
                 <button onclick="socket.emit('fold')">Fold</button>
                 <button onclick="socket.emit('check')">Check</button>
-                <button onclick="socket.emit('bet')">Bet</button>
+                <button onclick="bet()">Bet</button>
             </div>
             <div id="addBet" class="hidden">
                 <button onclick="socket.emit('fold')">Fold</button>
                 <button onclick="socket.emit('call')">Call</button>
-                <button onclick="socket.emit('raise')">Raise</button>
+                <button onclick="bet()">Raise</button>
             </div>
             <div id="bet" class="hidden">
                 <button onclick="socket.emit('bet', 1)">1</button>

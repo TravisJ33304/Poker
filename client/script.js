@@ -4,6 +4,17 @@ let ctx; // rendering context
 
 let playerName; // keep track of player name
 
+function ready() { // player is ready to start
+    socket.emit('ready');
+    document.getElementById("ready").style.display = "none";
+}
+
+function bet() {
+    document.getElementById("firstBet").style.display = "none";
+    document.getElementById("addBet").style.display = "none";
+    document.getElementById("bet").style.display = "block";
+}
+
 socket.on("nameResult", function(data) {
     if (data) { // set name and recieved rooms
         playerName = document.getElementById("name").value;

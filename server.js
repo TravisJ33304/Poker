@@ -18,12 +18,6 @@ app.get("/", function (req, res) { // send when webpage loaded
   res.sendFile(__dirname + "/client/index.html");
 });
 // utility functions
-function checkInput(input) {
-    if (input && input != "")
-        return true;
-    else
-        return false;
-}
 function findRoom(name) { // look for a room and return it otherwise return false
     for (let room of rooms)
         if (name == room.name)
@@ -36,22 +30,22 @@ function roomNames() { // return a list of room names
         names.push(room.name);
     return names;
 }
-function leaveRoom(socket) { // disconnect a player from a game room
-    let room = socket.player.room;
-    socket.leave(room.name);
-    room.players.splice(room.players.indexOf(socket.player), 1);
-    console.log(socket.player.name + " left room: " + room.name);
+function leaveRoom(player) { // disconnect a player from a game room
+    let room = findRoom(player.room);
+    leave(room.name);
+    room.players.splice(room.players.indexOf(player), 1);
+    console.log(player.name + " left room: " + room.name);
 }
 // object classes
 function Player(name) {
     return {
         name: name,
-        room: {},
+        room: "",
         ready: false,
         hand: [], // cards in hand
         chips: [], // number of chips for each value
         calcMoney: function() { // return the integer total of money
-            return (chips[0] * 100) + (chips[1] * 50) + (chips[2] * 25) + (chips * 10) + (chips[3] * 5) + (chips[4]);
+            return (chips[0] * 100) + (chips[1] * 25) + (chips[2] * 10) + (chips[3] * 5) + (chips[4]);
         }
     };
 }
@@ -74,20 +68,28 @@ function Room(name, host) {
         newGame: function() {
             this.deck = newDeck.splice(); // copy a new deck
             this.deck.sort(() => Math.random() - 0.5); // shuffle the deck
-            for (let player of this.players) {
-                player = {
-                    ...player,
-                    hand: [],
-                    chips: [1, 2, 3, 4, 5],
-                    betPlaced: 0,
-                };
+            for (let player of this.players) { // reset players
+                // give players money for joining/blind
+                if (player.chips === undefined) {
+                    player.chips = [1, 2, 3, 4, 5];
+                } else {
+                    if (player.chips[3] === 0)
+                        player.chips[3] = 1;
+                    if (player.chips[4] === 0)
+                        player.chips[4] = 1;
+                }
+                // empty hand and reset bet
+                player.hand = [];
+                player.betPlaced = 0;
             }
+            // start first round of betting
             this.players[0].chips[3]--; // big blind
             this.players[0].betPlaced = 5;
             this.players[1].chips[4]--; // small blind
             this.players[1].betPlaced = 1;
-            this.currentBet = 5;
-            this.playerTurn = 1;
+            this.currentBet += 5;
+            this.playerTurn++;
+            // send initial data to players
             io.to(this.name).emit("gameStart", this);
         }
     };
@@ -96,7 +98,7 @@ function Room(name, host) {
 io.on("connection", function (socket) { // client connects
     console.log("User connected: " + socket.id);
     socket.on("name", function(data) { // client sends name in
-        if (checkInput(data) === true) {
+        if (data) {
             socket.player = Player(data); // add player object to socket
             players.push(socket.player); // add player to users
             console.log("Name chosen: " + data);
@@ -108,12 +110,12 @@ io.on("connection", function (socket) { // client connects
         }
     });
     socket.on("createRoom", function(data) { // make a new room
-        if (checkInput(data) === true && findRoom(data) === false) {
+        if (data && findRoom(data) === false) {
             socket.join(data);
             let room = Room(data, socket.player);
             rooms.push(room);
             socket.emit("roomResult", room);
-            socket.player.room = room;
+            socket.player.room = data;
             console.log("Room created: " + data);
         } else { // error occurred
             socket.emit("roomResult", false);
@@ -121,28 +123,28 @@ io.on("connection", function (socket) { // client connects
     });
     socket.on("joinRoom", function(data) { // join a room
         let room = findRoom(data);
-        if (room !== false) {
+        if (room !== false && room.players.length <= 3) {
             room.players.push(socket);
             socket.join(data);
-            socket.player.room = room;
+            socket.player.room = data;
             socket.emit("roomsResult", room);
-            console.log(socket.player.name + " joined room: " + socket.player.room.name);
+            console.log(socket.player.name + " joined room: " + socket.player.room);
         } else { // error occurred
             socket.emit("roomResult", false);
         }
     });
     socket.on("ready", function() { // player is ready to start
         socket.player.ready = true;
-        socket.player.room.checkStart();
+        findRoom(socket.player.room).checkStart();
     });
     socket.on("leaveRoom", function() { // client leaves lobby
-        leaveRoom(socket);
+        leaveRoom(socket.player);
         socket.emit("nameResult", roomNames());
     });
     socket.on("disconnect", function() { // client disconnects
         console.log("User disconnected: " + socket.id);
         if (socket.player.room)
-            leaveRoom(socket);
+            leaveRoom(socket.player);
         players.splice(players.indexOf(socket.player), 1); // remove userdata
     });
 });
