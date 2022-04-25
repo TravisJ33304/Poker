@@ -1,6 +1,6 @@
 let socket = io(); // connect to server
 
-let ctx; // rendering context
+let ctx, assets; // rendering context and assets
 
 let playerName; // keep track of player name
 

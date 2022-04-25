@@ -48,7 +48,9 @@ function Player(name) {
         name: name,
         room: "",
         ready: false,
-        hand: [], // cards in hand
+        hand: [],
+        money: 250, // starting money
+        folded: true // not counted towards current round
     };
 }
 function Room(name, host) {
@@ -63,23 +65,22 @@ function Room(name, host) {
         checkStart: function() {
             if (this.players.length < 2) // 2 or more players required to play
                 return;
-            for (let player of this.players) // check all players are ready
+            for (let player of this.players) // don't start if not ready
                 if (player.ready === false)
                     return;
             this.newGame(); // start a new game
         },
         newGame: function() {
-            this.deck = newDeck.splice(); // copy a new deck
+            this.deck = newDeck.slice(); // copy a new deck
             this.deck.sort(() => Math.random() - 0.5); // shuffle the deck
             for (let player of this.players) { // reset player data
-                // give players money for joining/blind
-                if (player.money === undefined)
-                    player.money = 250;
-                else if (player.money < 5)
+                // give players money for blind
+                if (player.money < 5)
                     player.money = 5;
                 // empty hand and reset bet
                 player.hand = [];
                 player.betPlaced = 0;
+                player.folded = false;
             }
             // start first round of betting
             this.players[0].money--; // small blind
