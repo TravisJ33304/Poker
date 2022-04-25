@@ -38,7 +38,6 @@ socket.on("roomResult", function(data) { // recieve room list from server
     if (data) { // joined room and start game
         document.getElementById("rooms").style.display = "none";
         document.getElementById("game").style.display = "block";
-        document.getElementById("roomName").innerHTML = data.name;
     } else { // error occurred
         document.getElementById("roomError").style.display = "block";
     }

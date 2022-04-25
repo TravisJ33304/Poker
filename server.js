@@ -12,6 +12,12 @@ let players = []; // store player data
 let rooms = []; // game rooms
 
 let newDeck = []; // list of full deck
+// add cards to newDeck
+let suits = ["s", "c", "d", "h"];
+let cards = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "j", "q", "k", "a"];
+for (let suit of suits)
+    for (let card of cards)
+        newDeck.push({suit:suit, card:card});
 // serve webpage to client
 app.use("/client", express.static(__dirname + "/client")); // clientside file directory
 app.get("/", function (req, res) { // send when webpage loaded
@@ -43,10 +49,6 @@ function Player(name) {
         room: "",
         ready: false,
         hand: [], // cards in hand
-        chips: [], // number of chips for each value
-        calcMoney: function() { // return the integer total of money
-            return (chips[0] * 100) + (chips[1] * 25) + (chips[2] * 10) + (chips[3] * 5) + (chips[4]);
-        }
     };
 }
 function Room(name, host) {
@@ -55,10 +57,11 @@ function Room(name, host) {
         players: [host],
         state: "lobby", // state of the game
         currentBet: 0, // amount of bet being placed
+        pot: 0, // total winnings for the round
         deck: [], // deck of cards
         playerTurn: 0,
         checkStart: function() {
-            if (this.players.length < 2)
+            if (this.players.length < 2) // 2 or more players required to play
                 return;
             for (let player of this.players) // check all players are ready
                 if (player.ready === false)
@@ -68,27 +71,23 @@ function Room(name, host) {
         newGame: function() {
             this.deck = newDeck.splice(); // copy a new deck
             this.deck.sort(() => Math.random() - 0.5); // shuffle the deck
-            for (let player of this.players) { // reset players
+            for (let player of this.players) { // reset player data
                 // give players money for joining/blind
-                if (player.chips === undefined) {
-                    player.chips = [1, 2, 3, 4, 5];
-                } else {
-                    if (player.chips[3] === 0)
-                        player.chips[3] = 1;
-                    if (player.chips[4] === 0)
-                        player.chips[4] = 1;
-                }
+                if (player.money === undefined)
+                    player.money = 250;
+                else if (player.money < 5)
+                    player.money = 5;
                 // empty hand and reset bet
                 player.hand = [];
                 player.betPlaced = 0;
             }
             // start first round of betting
-            this.players[0].chips[3]--; // big blind
-            this.players[0].betPlaced = 5;
-            this.players[1].chips[4]--; // small blind
-            this.players[1].betPlaced = 1;
-            this.currentBet += 5;
-            this.playerTurn++;
+            this.players[0].money--; // small blind
+            this.players[0].betPlaced = 1;
+            this.players[1].money -= 5; // big blind
+            this.players[1].betPlaced = 5;
+            this.currentBet = 5;
+            this.playerTurn = 2;
             // send initial data to players
             io.to(this.name).emit("gameStart", this);
         }
